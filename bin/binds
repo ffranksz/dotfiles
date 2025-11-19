@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Franklin Souza
+# @ffranksz
+
+# Caminho para o arquivo de configuração do Sway
+SWAY_CONFIG="${HOME}/.config/sway/config"
+
+# Cores ANSI
+RESET="\033[0m"
+BOLD="\033[1m"
+DIM="\033[2m"
+CYAN="\033[36m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+GRAY="\033[90m"
+SEPARATOR="${GRAY}──────────────────────────────────────────────────────${RESET}"
+
+# Verifica se o arquivo existe
+if [[ ! -f "$SWAY_CONFIG" ]]; then
+  echo -e "${YELLOW}⚠️  Arquivo de configuração não encontrado em:${RESET} $SWAY_CONFIG"
+  exit 1
+fi
+
+echo -e "\n${CYAN}${BOLD}🎛️  Binds configuradas no Sway${RESET}"
+echo -e "$SEPARATOR"
+
+# Extrai binds, ignorando vazios e comentários
+binds=$(grep -E '^\s*bindsym\s' "$SWAY_CONFIG" | sed 's/^\s*bindsym\s*//' | sed '/^#/d')
+
+if [[ -z "$binds" ]]; then
+  echo -e "${YELLOW}Nenhuma bind encontrada no arquivo.${RESET}"
+  exit 0
+fi
+
+# Ordena e separa por prefixo de mod (por ex: $mod, Ctrl, etc.)
+mods=$(echo "$binds" | awk '{print $1}' | sed 's/[+].*//' | sort -u)
+
+for mod in $mods; do
+  echo -e "\n${BOLD}${GREEN}🔹 Atalhos com prefixo '${mod}'${RESET}"
+  echo -e "${DIM}Tecla(s) adicionais        | Ação${RESET}"
+  echo -e "${GRAY}---------------------------|--------------------------${RESET}"
+
+  echo "$binds" | grep "^${mod}" | while read -r line; do
+    keybind=$(echo "$line" | awk '{print $1}')
+    action=$(echo "$line" | cut -d' ' -f2-)
+
+    extra_keys=$(echo "$keybind" | sed "s/^${mod}+//")
+
+    printf "%-27s | %s\n" "$extra_keys" "$action"
+  done
+done
+
+echo -e "\n$SEPARATOR"
+echo -e "${DIM}Dica: você pode filtrar com ${CYAN}fzf${DIM}, assim:${RESET}"
+echo -e "${BOLD}  ./mostrar_binds.sh | fzf${RESET}"
+
