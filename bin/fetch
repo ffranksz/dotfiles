@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# User: Franklin Souza
-# Telegram: @FranklinTech
+# Franklin Souza
+# @ffranksz
 
 # CMUS - Play Music in Terminal
 if `pgrep -x cmus >/dev/null` ; then
