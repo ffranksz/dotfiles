@@ -1,0 +1,40 @@
+window {
+  margin: 0px;
+  border: 1px solid #6c7086; /* surface1 */
+  background-color: #1e1e2e; /* base */
+}
+
+#input {
+  margin: 5px;
+  border: none;
+  color: #cdd6f4; /* text */
+  background-color: #313244; /* surface0 */
+}
+
+#inner-box {
+  margin: 5px;
+  border: none;
+  background-color: #1e1e2e; /* base */
+}
+
+#outer-box {
+  margin: 5px;
+  border: none;
+  background-color: #1e1e2e; /* base */
+}
+
+#scroll {
+  margin: 0px;
+  border: none;
+}
+
+#text {
+  margin: 5px;
+  border: none;
+  color: #cdd6f4; /* text */
+}
+
+#entry:selected {
+  background-color: #45475a; /* surface2 */
+}
+
