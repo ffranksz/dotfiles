@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# Franklin Souza
+# @ffranksz
+
+
+EMOJI_DIR="$HOME/.config/emoji-picker/categories"
+HISTORY_FILE="$HOME/.config/emoji-picker/history.txt"
+
+mkdir -p "$EMOJI_DIR"
+touch "$HISTORY_FILE"
+
+while true; do
+    options=$(echo -e "📜 Histórico\n$(basename -a "$EMOJI_DIR"/*.txt | sed 's/.txt$//')")
+
+    category=$(echo "$options" | wofi --dmenu --prompt "Categoria:" --cache-file /dev/null)
+    [ -z "$category" ] && exit 0
+
+    if [ "$category" = "📜 Histórico" ]; then
+        source_file="$HISTORY_FILE"
+    else
+        source_file="$EMOJI_DIR/$category.txt"
+    fi
+
+    [ ! -f "$source_file" ] && notify-send "Emoji Picker" "Arquivo não encontrado!" && continue
+
+    # Adiciona "Voltar" como última opção
+    emoji_line=$( (grep -v '^#' "$source_file"; echo "↩️ Voltar") | wofi --dmenu --prompt="Emoji ($category):" --cache-file /dev/null)
+    
+    if [[ "$emoji_line" == "↩️ Voltar" || -z "$emoji_line" ]]; then
+        continue
+    fi
+
+    emoji=$(echo "$emoji_line" | awk '{print $1}')
+    [ -z "$emoji" ] && exit 1
+
+    echo -n "$emoji" | wl-copy
+
+    # Atualiza histórico (50 últimos)
+    grep -v "$emoji_line" "$HISTORY_FILE" > "$HISTORY_FILE.tmp"
+    echo "$emoji_line" >> "$HISTORY_FILE.tmp"
+    tail -n 50 "$HISTORY_FILE.tmp" > "$HISTORY_FILE"
+    mv "$HISTORY_FILE" "$HISTORY_FILE.tmp" && mv "$HISTORY_FILE.tmp" "$HISTORY_FILE"
+
+    notify-send "Emoji copiado" "$emoji"
+    exit 0
+done
+
