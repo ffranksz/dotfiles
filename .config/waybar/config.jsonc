@@ -1,0 +1,300 @@
+// ██╗    ██╗ █████╗ ██╗   ██╗██████╗  █████╗ ██████╗ 
+// ██║    ██║██╔══██╗╚██╗ ██╔╝██╔══██╗██╔══██╗██╔══██╗
+// ██║ █╗ ██║███████║ ╚████╔╝ ██████╔╝███████║██████╔╝
+// ██║███╗██║██╔══██║  ╚██╔╝  ██╔══██╗██╔══██║██╔══██╗
+// ╚███╔███╔╝██║  ██║   ██║   ██████╔╝██║  ██║██║  ██║
+//  ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+
+// 					Franklin Souza
+//					   @ffranksz
+
+{
+	"layer": "top",
+	"position": "top",
+
+	"modules-left": [
+		"sway/workspaces",
+	],
+
+	"modules-center":[""],
+
+	"modules-right": [
+		"custom/arrow9",
+		"pulseaudio",
+		"custom/arrow8",
+		"custom/check_updates",
+		"custom/arrow7",
+		"memory",
+		"custom/arrow6",
+		"cpu",
+		"custom/arrow5",
+		"temperature",
+		"custom/arrow4",
+		"custom/colorpicker",
+		"custom/screenshot",
+		"custom/mic_status",
+		"custom/recorder",
+		"custom/arrow3",
+		"sway/language",
+		"custom/arrow2",
+		"clock#date",
+		"custom/arrow1",
+		"clock#time",
+		"tray",
+		"group/group-power"
+	],
+
+	// Modules
+
+	"battery": {
+		"interval": 10,
+		"states": {
+			"warning": 30,
+			"critical": 15
+		},
+		"format-time": "{H}:{M:02}",
+		"format": "{icon} {capacity}% ({time})",
+		"format-charging": " {capacity}% ({time})",
+		"format-charging-full": " {capacity}%",
+		"format-full": "{icon} {capacity}%",
+		"format-alt": "{icon} {power}W",
+		"format-icons": [
+			" ",
+			" ",
+			" ",
+			" ",
+			" "
+		],
+		"tooltip": false
+	},
+
+	"clock#time": {
+		"interval": 10,
+		"format": "{:%I:%M %p}",
+		"tooltip": false
+	},
+
+	"clock#date": {
+		"interval": 20,
+		"format": "{:%a  %e %b %Y}",
+		"tooltip": false
+		//"tooltip-format": "{:%e %B %Y}"
+	},
+
+	"cpu": {
+        "format": "   {usage}%",
+        "tooltip": false
+    },
+
+	"sway/language": {
+		"format": "     {}",
+		"min-length": 5,
+		"on-click": "swaymsg 'pt-br'",
+		"tooltip": false
+	},
+
+	 "memory": {
+        "format": "    {}%"
+    },
+
+	"network": {
+		"interval": 5,
+		"format-wifi": " {essid} ({signalStrength}%)",
+		"format-ethernet": " {ifname}",
+		"format-disconnected": "No connection",
+		"format-alt": " {ipaddr}/{cidr}",
+		"tooltip": false
+	},
+
+	"sway/mode": {
+		"format": "{}",
+		"tooltip": false,
+		"ipc": true,
+	},
+
+	"sway/window": {
+		"format": "{}",
+		"max-length": 30,
+		"tooltip": false
+	},
+
+	"sway/workspaces": {
+		"disable-scroll-wraparound": true,
+		"smooth-scrolling-threshold": 4,
+		"enable-bar-scroll": true,
+		"format": "{name}"
+	},
+
+	"pulseaudio": {
+		"format": "{icon} {volume}%",
+		"format-bluetooth": "{icon} {volume}%",
+		"format-muted": " Muted",
+		"format-icons": {
+			"headphone": "",
+			"hands-free": "",
+			"headset": "",
+			"phone": "",
+			"portable": "",
+			"car": "",
+			"default": ["    ", "    "]
+		},
+		"scroll-step": 1,
+		"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+		"on-click-right": "pavucontrol",
+		"tooltip": false
+	},
+
+	"temperature": {
+    	"interval": 2,
+     	"thermal-zone": 2,
+     	"hwmon-path": "/sys/class/hwmon/hwmon1/temp1_input",
+     	"critical-threshold": 80,
+     	"format-critical": "{temperatureC}°C {icon}",
+     	"format": "{icon} {temperatureC}°C",
+     	"format-icons": ["", "", ""]
+    },
+
+	"tray": {
+		"icon-size": 18
+		//"spacing": 10
+	},
+
+	"custom/arrow1": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow2": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow3": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow4": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow5": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow6": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow7": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow8": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow9": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow10": {
+		"format": "",
+		"tooltip": false
+	},
+
+	"custom/mic_status": {
+    "exec": "cat /tmp/mic_status",
+    "interval": 1,
+    "on-click": "$HOME/.config/hypr/scripts/toggle_mic.sh",
+    "format": "{}",
+    "format-icons": {
+      "on": "Microfone Ativado",
+      "off": "Microfone Mutado"
+    },
+  },
+
+  "custom/recorder": {
+    "format": "{}",
+    //"exec": "pgrep -x wf-recorder > /dev/null && echo '  Gravando...' || echo ''",
+    "exec": "pgrep -x wf-recorder > /dev/null && echo '<span color=\"#F53C3C\">󰯜 Gravando...</span>' || echo ' 󰕨 '",
+    "interval": 2,
+    "on-click": "/home/franksz/.config/waybar/scripts/wfrecord.sh",
+    "on-click-right": "pgrep -x wf-recorder > /dev/null && (killall wf-recorder && notify-send 'Wf-Recorder' 'Gravação finalizada')",
+    "signal": 8,
+    },
+
+	"custom/screenshot": {
+    "format": "  {}",
+    "on-click": "/home/franksz/Scripts/screenshot.sh",
+    },
+
+	"custom/check_updates": {
+    	"exec": "~/.config/waybar/scripts/./check_updates.sh",
+    	"interval": 600,
+    	"on-click": "kitty --hold bash -c 'sudo pacman -Sy && pacman -Qu'"
+  	},
+	"custom/colorpicker": {
+        	"format": " 󰃉 ",
+        	"tooltip": false,
+        	"on-click": "exec hyprpicker -ar",
+
+	},
+
+	"mpd": {
+    "format": " 󰎆  {title} - {artist}",
+	"format-disconnected": " 󰎆  Disconnected",
+	"format-stopped": " 󰎆  {consumeIcon}{randomIcon}{repeatIcon}{singleIcon} Stopped",
+	"interval": 2,
+    "format-no-song": "   MPD is not playing",
+    "max-length": 50,
+    "on-click": "mpc toggle"
+	},
+
+	"group/group-power": {
+        "orientation": "inherit",
+        "drawer": {
+            "transition-duration": 500,
+            "children-class": "power-group-items-style", // CSS class to add to the children of the drawer, excluding the "group leader".
+            "transition-left-to-right": false
+        },
+        "modules": [
+            "custom/power", // First element is the "group leader" and won't ever be hidden
+            "custom/quit",
+            "custom/lock",
+            "custom/reboot"
+        ]
+    },
+    "custom/quit": {
+        "format": " 󰗼 ",
+        "tooltip": true,
+        "tooltip-format": "Quit",
+        "on-click": "hyprctl dispatch exit"
+    },
+    "custom/lock": {
+        "format": " 󰍁 ",
+        "tooltip": true,
+        "tooltip-format": "Lock",
+        "on-click": "hyprlock"
+    },
+    "custom/reboot": {
+        "format": " 󰜉 ",
+        "tooltip": true,
+        "tooltip-format": "Reboot",
+        "on-click": "shutdown -r now"
+    },
+    "custom/power": {
+        "format": "  ",
+        "tooltip": true,
+        "tooltip-format": "Power",
+        "on-click": "shutdown now"
+    }
+}
+
+// vi:ft=jsonc
