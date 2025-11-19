@@ -1,0 +1,182 @@
+#!/usr/bin/env bash
+# ==========================================================
+# Gerador interativo de mirrorlist do Arch Linux
+# Usa: reflector + fzf + backup automático
+# Autor: Franklin Souza
+# @ffranksz
+# ==========================================================
+
+set -euo pipefail
+
+# ---------- VERIFICA SUDO ----------
+if [ "$(id -u)" -ne 0 ]; then
+    echo -e "\e[31m✖ Este script deve ser executado com sudo!\e[0m"
+    echo "Use:"
+    echo
+    echo "  sudo $0"
+    echo
+    exit 1
+fi
+
+# ---------- CONFIG ----------
+COUNTRIES_LIST="
+Albania
+Armenia
+Australia
+Austria
+Azerbaijan
+Bangladesh
+Belarus
+Belguim
+Brazil
+Burgaria
+Cambodia
+Canada
+Chile
+China
+Colombia
+Croatia
+Czechia
+Denmark
+Ecuador
+Estonia
+Finland
+France
+Georgia
+Germany
+Greece
+Hong Kong
+Hungary
+Iceland
+India
+Indonesia
+Iran
+Israel
+Italy
+Japan
+Kazakhstan
+Kenya
+Latvia
+Lithuania
+Luxembourg
+Malaysia
+Mauritius
+Mexico
+Moldova
+Morocco
+Nepal
+Netherlands
+New Caledonia
+New Zealand
+North Macedonia
+Norway
+Paraguay
+Poland
+Portugual
+Romania
+Russia
+Réunion
+Saudi Arabia
+Serbia
+Singapore
+Slovakia
+Slovenia
+South Africa
+South Korea
+Spain
+Sweden
+Switzerland
+Taiwan
+Thailand
+Türkiye
+Ukraine
+United Arab Emirates
+United Kingdom
+United States
+Uzbekistan
+Vietnam
+"
+
+LATEST_VALUES=$(seq 5 5 50)
+
+# ---------- CORES ----------
+VERDE="\e[32m"; VERMELHO="\e[31m"; AMARELO="\e[33m"; RESET="\e[0m"
+
+msg() { echo -e "${AMARELO}$1${RESET}"; }
+ok() { echo -e "${VERDE}✔ $1${RESET}"; }
+erro() { echo -e "${VERMELHO}✖ $1${RESET}"; }
+
+# ---------- BACKUP AUTOMÁTICO ----------
+backup_mirrorlist() {
+    local backup_dir="/etc/pacman.d/.mirrorlist-backup.bkp"
+    local timestamp
+    timestamp=$(date +"%d-%m-%Y-%Hh%Mm%Ss")
+    local backup_file="${backup_dir}/mirrorlist-backup-${timestamp}.bkp"
+
+    # Cria diretório se não existir
+    if [ ! -d "$backup_dir" ]; then
+        mkdir -p "$backup_dir"
+        ok "Pasta de backup criada: $backup_dir"
+    fi
+
+    cp /etc/pacman.d/mirrorlist "$backup_file"
+    ok "Backup criado: $backup_file"
+}
+
+# ---------- FZF SELEÇÃO DE PAÍSES ----------
+selecionar_paises() {
+    echo "$COUNTRIES_LIST" |
+        fzf --multi --height=80% --prompt="Escolha 2 países: " --border |
+        head -n 2
+}
+
+# ---------- FZF SELEÇÃO DE LATEST ----------
+selecionar_latest() {
+    echo "$LATEST_VALUES" |
+        fzf --height=50% --prompt="Escolha o valor de --latest: " --border
+}
+
+# ---------- EXECUÇÃO PRINCIPAL ----------
+main() {
+    clear
+    msg "🌍 SELECIONE **2 PAÍSES** PARA O REFLECTOR"
+    paises=$(selecionar_paises)
+
+    if [ "$(echo "$paises" | wc -l)" -ne 2 ]; then
+        erro "Você deve escolher EXATAMENTE 2 países."
+        exit 1
+    fi
+
+    COUNTRY=$(echo "$paises" | paste -sd "," -)
+
+    clear
+    msg "⏱️ SELECIONE O VALOR DE --latest (intervalos de 5)"
+    LATEST=$(selecionar_latest)
+
+    clear
+    msg "📌 Pronto para gerar a mirrorlist!"
+    echo -e "Países selecionados: ${VERDE}$COUNTRY${RESET}"
+    echo -e "Latest: ${VERDE}$LATEST${RESET}"
+    echo
+
+    read -rp "Confirmar execução do reflector? (s/N): " CONFIRM
+    if [[ ! "$CONFIRM" =~ ^[sS]$ ]]; then
+        erro "Cancelado pelo usuário."
+        exit 1
+    fi
+
+    # Backup antes de alterar a mirrorlist
+    backup_mirrorlist
+
+    # Executa o reflector
+    reflector \
+        --save /etc/pacman.d/mirrorlist \
+        --protocol https \
+        --country "$COUNTRY" \
+        --latest "$LATEST" \
+        --sort age
+
+    ok "Mirrorlist atualizada com sucesso!"
+}
+
+main
