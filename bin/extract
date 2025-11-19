@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# Franklin Souza
+# @ffranksz
+
+# ──────────────────────────────────────────────────────────────
+# 🗃️ Script para extrair arquivos multipart .7z.001, .002, etc.
+# ──────────────────────────────────────────────────────────────
+
+# Cores
+GREEN='\e[32m'
+RED='\e[31m'
+YELLOW='\e[33m'
+BLUE='\e[34m'
+BOLD='\e[1m'
+RESET='\e[0m'
+
+# Notificação com som (se possível)
+notify() {
+    local title="$1"
+    local message="$2"
+
+    if command -v notify-send &>/dev/null; then
+        notify-send "$title" "$message"
+    fi
+
+    if command -v canberra-gtk-play &>/dev/null; then
+        canberra-gtk-play -i complete &>/dev/null &
+    fi
+}
+
+# Verifica dependência
+if ! command -v 7z &>/dev/null; then
+    echo -e "${RED}❌ Erro: o comando '7z' (p7zip) não está instalado.${RESET}"
+    echo -e "Instale com: ${YELLOW}sudo pacman -S p7zip${RESET} (ou equivalente)"
+    exit 1
+fi
+
+# Verifica flag
+FLAG="$1"
+DIR="${2:-.}"
+
+if [[ "$FLAG" != "a" && "$FLAG" != "x" ]]; then
+    echo -e "${YELLOW}Uso:${RESET} $(basename "$0") [a|x] [diretório]"
+    echo -e "${YELLOW}a${RESET} - extrai todos os arquivos com sequência .7z.001"
+    echo -e "${YELLOW}x${RESET} - extrai apenas arquivos únicos .7z (sem sequência)"
+    exit 1
+fi
+
+# Navega até o diretório
+cd "$DIR" || { echo -e "${RED}❌ Erro: não foi possível acessar o diretório '$DIR'.${RESET}"; exit 1; }
+
+echo -e "${BLUE}📂 Diretório:${RESET} $PWD"
+
+# Modo "a" - extrai arquivos com sequência .7z.001
+if [[ "$FLAG" == "a" ]]; then
+    FILES=(*.7z.001)
+
+    if [ ${#FILES[@]} -eq 0 ]; then
+        echo -e "${YELLOW}⚠️ Nenhum arquivo .7z.001 encontrado.${RESET}"
+        exit 0
+    fi
+
+    for file in "${FILES[@]}"; do
+        echo -e "${GREEN}📦 Extraindo:${RESET} ${BOLD}$file${RESET}"
+        if 7z x "$file"; then
+            echo -e "${GREEN}✅ Extração concluída para:${RESET} $file"
+            notify "Extração concluída" "$file extraído com sucesso"
+        else
+            echo -e "${RED}❌ Falha ao extrair:${RESET} $file"
+            notify "Erro na extração" "Houve um problema ao extrair $file"
+        fi
+    done
+fi
+
+# Modo "x" - extrai apenas arquivos .7z que não têm sequência
+if [[ "$FLAG" == "x" ]]; then
+    FILES=(*.7z)
+
+    # Remove arquivos que fazem parte de sequências (ex: .7z.001)
+    UNIQUE_FILES=()
+    for f in "${FILES[@]}"; do
+        [[ "$f" =~ \.7z\.[0-9]{3}$ ]] && continue
+        UNIQUE_FILES+=("$f")
+    done
+
+    if [ ${#UNIQUE_FILES[@]} -eq 0 ]; then
+        echo -e "${YELLOW}⚠️ Nenhum arquivo .7z único encontrado.${RESET}"
+        exit 0
+    fi
+
+    for file in "${UNIQUE_FILES[@]}"; do
+        echo -e "${GREEN}📦 Extraindo:${RESET} ${BOLD}$file${RESET}"
+        if 7z x "$file"; then
+            echo -e "${GREEN}✅ Extração concluída para:${RESET} $file"
+            notify "Extração concluída" "$file extraído com sucesso"
+        else
+            echo -e "${RED}❌ Falha ao extrair:${RESET} $file"
+            notify "Erro na extração" "Houve um problema ao extrair $file"
+        fi
+    done
+fi
+
+echo -e "${BOLD}${BLUE}🎉 Extrações finalizadas.${RESET}"
