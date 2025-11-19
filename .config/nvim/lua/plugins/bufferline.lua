@@ -1,0 +1,2 @@
+-- Bufferline
+require('bufferline').setup{}
