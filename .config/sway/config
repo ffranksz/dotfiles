@@ -30,7 +30,7 @@ gaps inner 4
 default_border pixel
 
 # Definindo Wallpaper
-output HDMI-A-1 mode 1920x1080 pos 1920 0 bg ~/Wallpapers/014.png stretch
+output HDMI-A-1 mode 1920x1080 pos 1920 0 bg ~/Wallpapers/001.png stretch
 #output * bg /home/franksz/Wallpapers/013.png fill
 
 # Definindo o layout do teclado
@@ -39,9 +39,6 @@ input "type:keyboard"   {
                     xkb_variant abnt2
                     xkb_model abnt2
             }
-
-
-# KeyBinds
 
 # Start a terminal
 bindsym $mod+Return exec $term
@@ -62,7 +59,7 @@ bindsym $mod+t exec telegram
 bindsym $mod+Shift+b exec bitwarden-desktop
 
 # LockScreen
-bindsym $mod+x exec $HOME/Scripts/locksway.sh
+bindsym $mod+x exec $HOME/Scripts/locksway
 
 # Reload Waybar
 bindsym $mod+Shift+w exec killall waybar && waybar
