@@ -5,7 +5,8 @@
 /* ███████║   ██║      ██║   ███████╗███████╗██╗╚██████╗███████║███████║ */
 /* ╚══════╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝╚═╝ ╚═════╝╚══════╝╚══════╝ */
 
-
+						  /*Franklin Souza*/
+							  /*@ffranksz*/
 
 /* Keyframes */
 
@@ -36,7 +37,7 @@
 @define-color braqua	#A6DA95;
 @define-color white	#EE99A0;
 @define-color bg2	#504945;
-@define-color bg1   #242839;
+@define-color bg1   #1A1A1A;
 
 
 @define-color warning 	@bryellow;
@@ -75,7 +76,7 @@
 /* The whole bar */
 #waybar {
 	/*background: rgba(40, 40, 40, 0.8784313725); [> #282828e0 <]*/
-	background: #242839;
+	background: #1E1E28;
 	color: @white;
 	font-family: JetBrains Mono, Siji;
 	font-size: 10pt;
