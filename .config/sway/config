@@ -30,7 +30,7 @@ gaps inner 4
 default_border pixel
 
 # Definindo Wallpaper
-output HDMI-A-1 mode 1920x1080 pos 1920 0 bg ~/Wallpapers/001.png stretch
+#output HDMI-A-1 mode 1920x1080 pos 1920 0 bg ~/Wallpapers/001.png stretch
 #output * bg /home/franksz/Wallpapers/013.png fill
 
 # Definindo o layout do teclado
