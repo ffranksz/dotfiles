@@ -9,15 +9,15 @@ if [ $(tty) = /dev/tty1 ]; then
       export QT_QPA_PLATFORM=wayland
       export CLUTTER_BACKEND=wayland
       export MOZ_ENABLE_WAYLAND=1
-      export ENABLE_VK_KHR_WAYLAND_SURFACE=1
-      export VK_ICD_FILENAMES=/etc/vulkan/icd.d/radeon_icd.x86_64.json
-      export VK_LAYER_PATH=/usr/share/vulkan/explicit_layer.d
       export SDL_VIDEODRIVER=wayland
+      #export ENABLE_VK_KHR_WAYLAND_SURFACE=1
+      #export VK_ICD_FILENAMES=/etc/vulkan/icd.d/radeon_icd.x86_64.json
+      #export VK_LAYER_PATH=/usr/share/vulkan/explicit_layer.d
 
       # keyboard related
       export XKB_DEFAULT_LAYOUT='br'
       export XKB_DEFAULT_VARIANT='abnt2'
-      #clear && sway
+      clear && sway
      
 elif [ "$(tty)" = "/dev/tty2" ]; then
       #clear && startx
@@ -36,5 +36,5 @@ elif [ "$(tty)" = "/dev/tty3" ]; then
       #export XKB_DEFAULT_LAYOUT='br'
       #export XKB_DEFAULT_VARIANT='abnt2'
 
-      clear && exec Hyprland
+      #clear && exec Hyprland
 fi
