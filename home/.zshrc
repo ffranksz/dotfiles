@@ -19,10 +19,10 @@ fi
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Pywal
-(cat ~/.cache/wal/sequences &)
-cat ~/.cache/wal/sequences
-source ~/.cache/wal/colors-tty.sh
-. $HOME/.cache/wal/colors.sh
+#(cat ~/.cache/wal/sequences &)
+#cat ~/.cache/wal/sequences
+#source ~/.cache/wal/colors-tty.sh
+#. $HOME/.cache/wal/colors.sh
 
 # History ZSH
 HISTFILE=~/.zhistory # My zsh history
