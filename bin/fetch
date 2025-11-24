@@ -1,73 +1,82 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-# Franklin Souza
-# @ffranksz
+#
+# frankfetch — Mini "neofetch" personalizado do Franklin
+# CMUS + infos do sistema + Gruvbox
+#
 
-# CMUS - Play Music in Terminal
-if `pgrep -x cmus >/dev/null` ; then
-	PLAYER="CMUS:  "
-	INFO=$(cmus-remote -Q | grep status)
-	if [ "$INFO" = "status stopped" ] ; then
-		SONG="No music playing"
-	else
-		INFO=$(cmus-remote -Q)
-		ARTIST=$(printf "$INFO" | awk -F " " '/tag artist/{print substr($1, index($0, $3))}')
-		TITLE=$(printf "$INFO" | awk -F " " '/tag title/{print substr($1, index($0, $3))}')
-		ALBUM=$(printf "$INFO" | awk '/album/{print substr($1, index($0, $3))}' | head -1)
-		SONG="$ARTIST - $TITLE - $ALBUM"
-	fi
-else
-	SONG="No music playing"
-fi
+# -------------------------------
+#    Funções de utilidade
+# -------------------------------
 
-# COLORS
-RED="\034[1;31m"
-GREEN="\034[1;32m"
-YELLOW="\034[1;33m"
-BLUE="\034[1;34m"
-MAGENTA="\034[1;35m"
-CYAN="\034[1;36m"
+get_cmus_song() {
+    if ! pgrep -x cmus >/dev/null 2>&1; then
+        printf "No music playing"
+        return
+    fi
 
-# VARS
-TAB=""
-TAB2=$(echo "${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB} ${TAB}")
-COLOR="\e[2;38;05;32m"
-MACHINE=$(uname -m)
-OS=$(cat /etc/os-release | grep NAME | sed -n 2p | sed 's/NAME=//' | sed 's/\"//g')
-KERNEL=$(uname -sr)
-RESOLUTION=$(xrandr | awk '/*+/{print $2}')
-#WM=$(tail -n 2 .xinitrc | awk '{print substr($0, index($0, $2))}')
-#WM=$(tail -n 2 .xinitrc | awk '{print substr($0, index($0, $2))}')
-DE=
-TERMINAL=$(echo "Kitty")
-SHELL2=$(basename $SHELL)
-PACKAGES=$(pacman -Qq | wc -l)
-UP=$(uptime -p | sed 's/up //')
-UPTIME=$(awk '{printf("%i Hour(s), %i Minute(s)", ($2/60/60%24), ($1/60%60))}' /proc/uptime)
-CPU=$(cat /proc/cpuinfo | sed -n '6p' | awk '{print $4, $5, $6, $7, $8, $9}')
-MEM=$(echo -e $(free --mebi | sed -n '3p' | awk '{print $3}')MiB / $(free --mebi | sed -n '2p' | awk '{print $2}')MiB)
-SWAP="$(free -h | awk '/^Swap/ { print $4" / "$2}')"
+    local status
+    status=$(cmus-remote -Q | awk '/^status/ { print $2 }')
 
-# INFS
+    if [[ "$status" == "stopped" ]]; then
+        printf "No music playing"
+        return
+    fi
+
+    local artist title album
+    artist=$(cmus-remote -Q | awk -F ' ' '/tag artist/ { $1=$2=""; print substr($0,3) }')
+    title=$(cmus-remote -Q | awk -F ' ' '/tag title/ { $1=$2=""; print substr($0,3) }')
+    album=$(cmus-remote -Q | awk -F ' ' '/tag album/ { $1=$2=""; print substr($0,3) }' | head -1)
+
+    printf "%s - %s - %s" "$artist" "$title" "$album"
+}
+
+# -------------------------------
+#        Variáveis
+# -------------------------------
+
+# Gruvbox (suave)
+gruv_yellow="\e[38;5;214m"
+gruv_green="\e[38;5;142m"
+gruv_reset="\e[0m"
+
+tab="    "        # indentação
+tab2="${tab}${tab}${tab}${tab}${tab}"
+
+user_host="${USER} on $(uname -n)"
+os_name=$(grep "^PRETTY_NAME=" /etc/os-release | cut -d= -f2 | tr -d '"')
+kernel_info=$(uname -sr)
+machine=$(uname -m)
+packages=$(pacman -Qq | wc -l)
+wm="SwayWM"
+uptime_human=$(uptime -p | sed 's/up //')
+shell_name=$(basename "$SHELL")
+song=$(get_cmus_song)
+
+# -------------------------------
+#          Output final
+# -------------------------------
+
 clear
-echo -e "${TAB2}${YELLOW}$USER on $(uname -n)"
-echo 
-echo -e " ${TAB} ${COLOR}OS\034[0m: $OS"
-echo -e " ${TAB} ${COLOR}Architecture\034[0m: $MACHINE"
-echo -e " ${TAB} ${COLOR}Kernel\034[0m: $KERNEL"
-#echo -e " ${TAB} ${COLOR}Resolution\034[0m: $RESOLUTION"
-echo -e " ${TAB} ${COLOR}Packages\034[0m: $PACKAGES"
-echo -e " ${TAB} ${COLOR}WM\034[0m: SwayWM"
-#echo -e " ${TAB} ${COLOR}Terminal\034[0m: $TERMINAL"
-echo -e " ${TAB} ${COLOR}Uptime\034[0m: $UP"
-#echo -e " ${TAB} ${COLOR}Uptime\034[0m: $UPTIME"
-#echo -e " ${TAB} ${COLOR}Shell\034[0m: $SHELL"
-echo -e " ${TAB} ${COLOR}Shell\034[0m: $SHELL1"
-#echo && echo -e " ${TAB} Falar é fácil, me mostre o código."
-echo && echo -e " ${TAB} Talk is cheap. Show me the code."
-#echo -e " ${TAB} ${COLOR}Music\034[0m: $SONG"
-#echo -e " ${TAB} ${COLOR}Mem\034[0m: $MEM"
-#echo -e " ${TAB} ${COLOR}Swap\034[0m: $SWAP"
-#echo -e " ${TAB} ${COLOR}Gpu\034[0m ........: $GPU"
-#echo -e " ${TAB} ${COLOR}Cpu\034[0m: $CPU"
-echo && echo -e " ${TAB} \033[1;31m███\033[1;32m███\033[1;33m███\033[1;34m███\033[1;35m███\033[1;36m███" && echo
+
+# Header
+echo -e "${tab2}${gruv_yellow}${user_host}${gruv_reset}"
+echo
+
+# Corpo
+echo -e " ${tab} ${gruv_green}OS${gruv_reset}: ${os_name}"
+echo -e " ${tab} ${gruv_green}Architecture${gruv_reset}: ${machine}"
+echo -e " ${tab} ${gruv_green}Kernel${gruv_reset}: ${kernel_info}"
+echo -e " ${tab} ${gruv_green}Packages${gruv_reset}: ${packages}"
+echo -e " ${tab} ${gruv_green}WM${gruv_reset}: ${wm}"
+echo -e " ${tab} ${gruv_green}Uptime${gruv_reset}: ${uptime_human}"
+echo -e " ${tab} ${gruv_green}Shell${gruv_reset}: ${shell_name}"
+
+echo
+echo -e " ${tab} Talk is cheap. Show me the code."
+echo
+
+# Barra de cores Gruvbox
+echo -e " ${tab} \e[48;5;124m   \e[0m\e[48;5;166m   \e[0m\e[48;5;214m   \e[0m\e[48;5;142m   \e[0m\e[48;5;109m   \e[0m"
+echo
