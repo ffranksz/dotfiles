@@ -14,6 +14,7 @@
 
 	"modules-left": [
 		"sway/workspaces",
+		"custom/spotify"
 	],
 
 	"modules-center":[""],
@@ -118,6 +119,18 @@
 		"tooltip": false
 	},
 
+	"custom/spotify": {
+    "format": "   {}",
+    "exec": "playerctl --player=spotify metadata --format '{{ title }} - {{ artist }}' || echo 'Spotify stopped'",
+    "interval": 2,
+    "max-length": 40,
+    "escape": true,
+    "on-click": "playerctl --player=spotify play-pause",
+    "on-scroll-up": "playerctl --player=spotify next",
+    "on-scroll-down": "playerctl --player=spotify previous",
+    "tooltip": false
+},
+
 	"sway/workspaces": {
 		"disable-scroll-wraparound": true,
 		"smooth-scrolling-threshold": 4,
@@ -139,6 +152,8 @@
 			"default": ["    ", "    "]
 		},
 		"scroll-step": 1,
+		"scroll-up": "$HOME/.config/dunst/volume-notify.sh up",
+		"scroll-down": "$HOME/.config/dunst/volume-notify.sh down",
 		"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
 		"on-click-right": "pavucontrol",
 		"tooltip": false
