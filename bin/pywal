@@ -1,99 +1,141 @@
 #!/usr/bin/env bash
+# Franklin Souza (@ffranksz)
+# Script atualizado com suporte completo ao Sway + Pywal
 
-# Franklin Souza
-# @ffranksz
+set -euo pipefail
 
 clear
 
-# Verifica se os pacotes necessários estão instalados
-[ ! `command -v wget` ] && echo "wget não instalado, por favor faça a instalação!!!" && exit 1
-[ ! `command -v fzf` ] && echo "fzf não instalado, por favor faça a instalação!!!" && exit 1
-[ ! `command -v unzip` ] && echo "unzip não instalado, por favor faça a instalação!!!" && exit 1
-[ ! `command -v hyprctl` ] && echo "hyprctl não instalado, por favor faça a instalação!!!" && exit 1
-
-# Função para atualizar o hyprpaper.conf
-update_hyprpaper() {
-    WALLPAPER_PATH="$1"
-    CONFIG_FILE="$HOME/.config/hypr/hyprpaper.conf"
-    
-    # Verifica se o arquivo de configuração existe
-    if [[ -f "$CONFIG_FILE" ]]; then
-        # Atualiza a linha que contém o preload e o wallpaper
-        sed -i "s|preload = .*|preload = $WALLPAPER_PATH|g" "$CONFIG_FILE"
-        sed -i "s|wallpaper = .*|wallpaper = HDMI-A-1,$WALLPAPER_PATH|g" "$CONFIG_FILE"
-        
-        # Recarrega a configuração do Hyprland
-        hyprctl reload
-        echo "Wallpaper e preload atualizados no Hyprpaper!"
-    else
-        echo "Arquivo hyprpaper.conf não encontrado!"
-    fi
+# -------------------------------
+# Função: checar dependências
+# -------------------------------
+check_dep() {
+    local dep="$1"
+    command -v "$dep" >/dev/null 2>&1 || {
+        printf "Dependência faltando: %s\nInstale antes de continuar!\n" "$dep"
+        exit 1
+    }
 }
 
-# Loop do menu
-while true ; do
+check_dep wget
+check_dep fzf
+check_dep unzip
+check_dep swaymsg   # necessário para aplicar wallpaper no Sway
+check_dep wal
 
-  # Variáveis para visualizar imagens
-  IMG1="catimg -r2 -w$COLUMNS"
-  IMG2="sxiv -g 512x512"
-  
-  # Cria o diretório de wallpapers, se não existir
-  mkdir -p $HOME/Wallpapers
-  DIR="$HOME/Wallpapers"
-  
-  clear
-  printf "
+# -------------------------------
+# Função: atualizar wallpaper no Sway
+# -------------------------------
+update_sway_wallpaper() {
+    local WALLPAPER_PATH="$1"
+    local CONFIG_FILE="$HOME/.config/sway/config"
+
+    if [[ ! -f "$CONFIG_FILE" ]]; then
+        echo "Config do Sway não encontrada!"
+        return 1
+    fi
+
+    # Atualiza a linha do wallpaper correspondente ao HDMI-A-1
+    sed -i "s|^\s*output HDMI-A-1.*bg .*|output HDMI-A-1 bg $WALLPAPER_PATH stretch|g" "$CONFIG_FILE"
+
+    # Recarrega o sway
+    swaymsg reload >/dev/null 2>&1 || true
+
+    echo "Wallpaper do Sway atualizado!"
+}
+
+# -------------------------------
+# Preparação
+# -------------------------------
+mkdir -p "$HOME/Wallpapers"
+DIR="$HOME/Wallpapers"
+
+# -------------------------------
+# Loop principal
+# -------------------------------
+while true; do
+    clear
+
+    printf "
  ██████╗ ██╗   ██╗██╗    ██╗ █████╗ ██╗     
  ██╔══██╗╚██╗ ██╔╝██║    ██║██╔══██╗██║     
  ██████╔╝ ╚████╔╝ ██║ █╗ ██║███████║██║     
  ██╔═══╝   ╚██╔╝  ██║███╗██║██╔══██║██║     
  ██║        ██║   ╚███╔███╔╝██║  ██║███████╗
  ╚═╝        ╚═╝    ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝
-                                           \n\n"
 
-  printf "Wallpaper atual: " && sed -n 3p ~/.cache/wal/colors.sh
-  printf "\n\nEscolha uma das opções abaixo:\n\n"
-  printf "[1] - Wallpaper aleatório (Pywal)\n"
-  printf "[2] - Definir Wallpaper (Pywal)\n"
-  printf "[3] - Baixar WallPack\n"
-  printf "[4] - Sair\n\n"
-  read -p "Digite sua escolha: " SELECTION
+"
+    # Variáveis para visualizar imagens
+    IMG1="catimg -r2 -w$COLUMNS"
+    IMG2="sxiv -g 512x512"
 
-  if [ "$SELECTION" == '1' ] || [ "$SELECTION" == '01' ] ; then
-    clear
-    my_array=($HOME/Wallpapers/*)
-    RANDOM_WALLPAPER="${my_array[$(( $RANDOM % ${#my_array[@]}))]}"
-    wal -i "$RANDOM_WALLPAPER" && $HOME/.config/dunst/./launchdunst.sh && wal-telegram --wal && \
-    cat /home/franksz/.cache/wal/colors-kitty.conf > ~/.config/kitty/theme.conf && \
-    cat /home/franksz/.cache/wal/colors-rofi-dark.rasi > ~/.config/rofi/config.rasi
-    
-    update_hyprpaper "$RANDOM_WALLPAPER"
-    read -p 'PRESS ENTER TO CONTINUE...' && continue
+    printf "Wallpaper atual (Pywal): "
+    sed -n 3p ~/.cache/wal/colors.sh || printf "Nenhum\n"
 
-  elif [ "$SELECTION" == '2' ] || [ "$SELECTION" == '02' ] ; then
-    IFS=$'\n'
-    mapfile -t array < <(find  ~/Wallpapers -regextype posix-egrep -regex '.*\.(jpg|png)' | \
-    fzf --preview="if [[ {} =~ ('.jpg'|'.JPG'|'.jpeg'|'.png'|'.PNG')$ ]]; then "$IMG1" {}; elif [ -d {} ]; then ls --color=always --group-directories-first -H {}; else nl -pba -w1 -s' ' {};fi" --query="$1" --multi --select-1 --exit-0)
-    
-    if [[ -n "${array[@]}" ]]; then
-      wal -i "${array[@]}" && $HOME/.config/dunst/./launchdunst.sh && wal-telegram --wal && \
-      cat /home/franksz/.cache/wal/colors-kitty.conf > ~/.config/kitty/theme.conf && \
-      #cat /home/franksz/.cache/wal/colors-rofi-dark.rasi > ~/.config/rofi/config.rasi
-      
-      update_hyprpaper "${array[@]}"
-    fi
-    read -p 'PRESS ENTER TO CONTINUE...' && continue
+    printf "\nEscolha:\n"
+    printf "[1] Wallpaper aleatório (Pywal)\n"
+    printf "[2] Selecionar Wallpaper (Pywal)\n"
+    printf "[3] Baixar WallPack\n"
+    printf "[4] Sair\n\n"
 
-  elif [ "$SELECTION" == '3' ] || [ "$SELECTION" == '03' ] ; then
-    clear
-    wget -c "https://github.com/frannksz/wallpack/archive/refs/heads/main.zip"
-    unzip main.zip
-    mv wallpack-main/* ~/Wallpapers/
-    rm -rf main.zip wallpack-main
-    cd $HOME/Wallpapers && rm -rf LICENSE && cd $HOME && continue
-  
-  elif [ "$SELECTION" == '4' ] || [ "$SELECTION" == '04' ] ; then
-    clear && exit 0
-  fi
-  
+    read -rp "Digite a opção: " SELECTION
+
+    case "$SELECTION" in
+        1|01)
+            clear
+            mapfile -t my_array < <(ls "$DIR")
+            if [[ ${#my_array[@]} -eq 0 ]]; then
+                echo "Nenhum wallpaper encontrado!"
+                read -rp "ENTER para continuar..."
+                continue
+            fi
+
+            RANDOM_WALLPAPER="$DIR/${my_array[$RANDOM % ${#my_array[@]}]}"
+
+            wal -i "$RANDOM_WALLPAPER"
+            $HOME/.config/dunst/launchdunst.sh
+            wal-telegram --wal
+
+            cp ~/.cache/wal/colors-kitty.conf ~/.config/kitty/theme.conf
+
+            update_sway_wallpaper "$RANDOM_WALLPAPER"
+            read -rp "ENTER para continuar..."
+            ;;
+        
+        2|02)
+            mapfile -t array < <(
+                find "$DIR" -regextype posix-egrep -regex '.*\.(jpg|png)' |
+                #fzf --preview="kitty +kitten icat --silent {}"
+                fzf --preview="$IMG1 {}"
+            )
+
+            [[ ${#array[@]} -eq 0 ]] && continue
+
+            SELECTED="${array[0]}"
+
+            wal -i "$SELECTED"
+            $HOME/.config/dunst/launchdunst.sh
+            wal-telegram --wal
+
+            cp ~/.cache/wal/colors-kitty.conf ~/.config/kitty/theme.conf
+
+            update_sway_wallpaper "$SELECTED"
+            read -rp "ENTER para continuar..."
+            ;;
+        
+        3|03)
+            clear
+            wget -c "https://github.com/frannksz/wallpack/archive/refs/heads/main.zip"
+            unzip main.zip
+            mv wallpack-main/* "$DIR"/
+            rm -rf main.zip wallpack-main
+            echo "WallPack baixado!"
+            read -rp "ENTER para continuar..."
+            ;;
+        
+        4|04)
+            clear
+            exit 0
+            ;;
+    esac
 done
