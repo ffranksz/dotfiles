@@ -8,6 +8,7 @@ call plug#begin('~/.config/nvim/plugged')
 
 " ===================== UI ===================== "
 Plug 'nvim-tree/nvim-web-devicons'
+Plug 'nvim-tree/nvim-tree.lua'
 Plug 'akinsho/bufferline.nvim'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'zaldih/themery.nvim'
