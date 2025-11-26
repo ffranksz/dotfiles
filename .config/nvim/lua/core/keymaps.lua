@@ -4,6 +4,10 @@
 vim.g.mapleader = ' '
 local map = vim.keymap.set
 
+-- NERDTreePlugin
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- Save
 map('n','<C-s>',':w<CR>')
 
@@ -19,8 +23,8 @@ map('n','<C-z>','u')
 -- Select All (Ctrl+A)
 map('n','<C-a>','ggVG')
 
--- NERDTree
-map('n','<C-l>',':NERDTreeToggle<CR>')
+-- NERDTree Files Icons
+map('n','<C-l>',':NvimTreeToggle<CR>', {silent = true})
 
 -- Terminal
 map('n','<leader>t',':vsplit term://zsh<CR>A')
@@ -29,7 +33,7 @@ map('n','<leader>t',':vsplit term://zsh<CR>A')
 default_opts = { noremap=true, silent=true }
 map('n','<C-d>',':t.<CR>',default_opts)
 
--- Comentários
+-- NERDTree Comentários
 map('n','<C-/>','<Plug>NERDCommenterToggle')
 map('x','<C-/>','<Plug>NERDCommenterToggle')
 
