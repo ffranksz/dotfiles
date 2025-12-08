@@ -23,7 +23,6 @@ Plug 'bluz71/vim-moonfly-colors', { 'as': 'moonfly' }
 Plug 'DanilaMihailov/beacon.nvim'
 Plug 'wfxr/minimap.vim'
 Plug 'NeogitOrg/neogit'
-Plug 'nvim-lua/plenary.nvim'
 Plug 'sindrets/diffview.nvim'
 
 " ===================== DASHBOARD ===================== "
