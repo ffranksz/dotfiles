@@ -8,6 +8,9 @@ local map = vim.keymap.set
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- Neogit Open
+vim.keymap.set("n", "<C-k>", ":Neogit<CR>", { noremap = true, silent = true })
+
 -- Save
 map('n','<C-s>',':w<CR>')
 
