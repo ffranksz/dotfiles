@@ -8,6 +8,19 @@ local map = vim.keymap.set
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- Toggle Indent Blankline
+vim.keymap.set(
+  "n",
+  "<leader>ib",
+  "<cmd>IBLToggle<CR>",
+  { desc = "Toggle Indent Blankline" }
+)
+
+-- Spell
+vim.keymap.set("n", "<leader>s", toggle_spell, {
+  desc = "Toggle spell checker",
+})
+
 -- Neogit Open
 vim.keymap.set("n", "<C-k>", ":Neogit<CR>", { noremap = true, silent = true })
 
