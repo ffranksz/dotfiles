@@ -50,6 +50,7 @@ Plug 'tc50cal/vim-terminal'
 Plug 'preservim/nerdtree'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'ellisonleao/carbon-now.nvim'
+Plug 'lukas-reineke/indent-blankline.nvim'
 
 " =======================================================
 "                           THEMES
