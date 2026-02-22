@@ -62,6 +62,11 @@ verificar_dependencias
 MUSICA_DIR="$HOME/Music"
 VIDEO_DIR="$HOME/Videos"
 
+# ===============================
+# COOKIES (YouTube Auth)
+# ===============================
+COOKIES="--cookies-from-browser firefox"
+
 notificar() {
     notify-send "$1" "$2"
     canberra-gtk-play --id="message-new-instant" --description="$1" &
