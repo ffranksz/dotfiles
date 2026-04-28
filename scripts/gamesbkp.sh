@@ -99,7 +99,21 @@ perform_backup() {
 }
 
 # =============================
+# BACKUP DS1
+# Dark Souls Remastered
+# =============================
+
+backup_ds1() {
+
+    local APPID="570940"
+    local SAVE_DIR="$STEAM_COMPAT/$APPID/pfx/drive_c/users/steamuser/Documents/NBGI/DARK SOULS REMASTERED"
+
+    perform_backup "DS1" "$SAVE_DIR"
+}
+
+# =============================
 # BACKUP DS2
+# Dark Souls II: Scholar of the First Sin
 # =============================
 
 backup_ds2() {
@@ -140,15 +154,17 @@ echo "=============================="
 echo "   🎮 BACKUP DE JOGOS"
 echo "=============================="
 echo
-echo "1) DS2"
-echo "2) AC Black Flag"
-echo "3) Sair"
+echo "1) DS1"
+echo "2) DS2"
+echo "3) AC Black Flag"
+echo "4) Sair"
 echo
 read -rp "Escolha uma opção: " opt
 
 case "$opt" in
-    1) backup_ds2 ;;
-    2) backup_acbf ;;
-    3) exit 0 ;;
+    1) backup_ds1 ;;
+    2) backup_ds2 ;;
+    3) backup_acbf ;;
+    4) exit 0 ;;
     *) echo "Opção inválida." ;;
 esac
