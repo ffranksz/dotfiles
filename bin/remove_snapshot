@@ -3,30 +3,72 @@
 # Franklin Souza
 # @ffranksz
 
-# Verifica se o script é executado como root
-if [ "$EUID" -ne 0 ]
-  then echo "Este script deve ser executado como root."
-  exit
-fi
+set -euo pipefail
 
-# Define o diretório dos snapshots
 snapshot_dir="/.snapshots"
 
-# Lista todos os snapshots btrfs no diretório
-snapshots=$(sudo btrfs subvolume list $snapshot_dir | awk '{print $9}' | fzf -m)
-
-# Verifica se o usuário selecionou pelo menos um snapshot
-if [[ -z "$snapshots" ]]; then
-  clear && echo "Nenhum snapshot selecionado, saindo."
-  cd $HOME && exit 1
+# Verifica se está rodando como root
+if [[ "${EUID}" -ne 0 ]]; then
+    echo "Este script deve ser executado como root." >&2
+    exit 1
 fi
 
-# Loop pelos snapshots selecionados e os exclui
-for snapshot in $snapshots; do
-  clear && sudo btrfs subvolume delete "$snapshot_dir/$snapshot"
-  echo "Snapshot $snapshot removido com sucesso."
+# Verifica se o diretório existe
+if [[ ! -d "$snapshot_dir" ]]; then
+    echo "Diretório de snapshots não encontrado: $snapshot_dir" >&2
+    exit 1
+fi
+
+# Monta a lista de snapshots
+mapfile -t snapshot_list < <(
+    btrfs subvolume list "$snapshot_dir" | awk '{print $NF}'
+)
+
+# Verifica se há snapshots
+if [[ ${#snapshot_list[@]} -eq 0 ]]; then
+    echo "Nenhum snapshot encontrado em $snapshot_dir."
+    exit 0
+fi
+
+# Seleção com fzf
+mapfile -t selected_snapshots < <(
+    printf '%s\n' "${snapshot_list[@]}" |
+        fzf -m \
+            --prompt="Selecione os snapshots para remover: " \
+            --header="TAB marca | ENTER confirma" \
+            --preview="echo '$snapshot_dir/{}'" \
+            --preview-window=down:3:wrap
+)
+
+# Verifica se algo foi selecionado
+if [[ ${#selected_snapshots[@]} -eq 0 ]]; then
+    echo "Nenhum snapshot selecionado. Saindo."
+    exit 0
+fi
+
+# Mostra os selecionados
+echo "Snapshots selecionados para remoção:"
+printf ' - %s\n' "${selected_snapshots[@]}"
+echo
+
+read -r -p "Tem certeza que deseja apagar os snapshots acima? [s/N]: " confirm
+if [[ ! "$confirm" =~ ^[Ss]$ ]]; then
+    echo "Operação cancelada."
+    exit 0
+fi
+
+# Remove os snapshots
+for snapshot in "${selected_snapshots[@]}"; do
+    full_path="$snapshot_dir/$snapshot"
+
+    if [[ -d "$full_path" ]]; then
+        echo "Removendo: $full_path"
+        btrfs subvolume delete "$full_path"
+        echo "Removido com sucesso: $snapshot"
+    else
+        echo "Ignorado, não encontrado: $full_path" >&2
+    fi
 done
 
-# Volta para o diretório home do usuário
-cd $HOME
-exit 0
+echo
+echo "Concluído."
